@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Senior DevOps / SRE Interview Cheat Sheet</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:#050608;color:#e6eaf0;font:16px/1.75 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:920px;margin:0 auto;padding:52px 24px 110px}
+header{border-bottom:1px solid #283240;padding-bottom:24px;margin-bottom:34px}
+.eyebrow{color:#7bd5f5;text-transform:uppercase;letter-spacing:.16em;font-size:12px;font-weight:700}
+h1{font-size:clamp(30px,5vw,48px);line-height:1.15;letter-spacing:-.035em;color:#fff}
+h2{margin-top:55px;padding-top:24px;border-top:1px solid #26313d;color:#87d9ff;font-size:24px;line-height:1.3}
+h3{color:#fff}p,li{color:#d7dce4}strong{color:#fff}
+a{color:#79d4ff}code{color:#c6f4ad;background:#171f28;border:1px solid #283441;border-radius:5px;padding:2px 5px;font-size:.88em}
+pre{overflow-x:auto;padding:20px 22px;background:#0e141c;border:1px solid #293744;border-radius:12px;line-height:1.55}
+pre code{background:none;border:0;padding:0;color:#b9e6bb;font-size:14px}
+ul{padding-left:25px}li{margin:8px 0}
+blockquote{border-left:4px solid #52bce9;background:#101a24;padding:12px 18px;margin:22px 0;border-radius:0 8px 8px 0}
+table{width:100%;border-collapse:collapse;display:block;overflow-x:auto;margin:20px 0}
+td{border:1px solid #34404d;padding:10px 12px;min-width:140px}
+tr:first-child{background:#182330;font-weight:700}
+hr{border:0;border-top:1px solid #34404d;margin:36px 0}
+nav{margin:24px 0;color:#a7bdcc;font-size:14px}
+@media print{body{background:#050608!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}main{padding:10px 24px}h2{break-after:avoid}pre{break-inside:avoid}}
+</style></head><body><main><header><div class="eyebrow">Infrastructure engineering · production scenarios · interview preparation</div></header>
+<h1>Senior DevOps / SRE Interview Cheat Sheet: 10 Production Scenarios</h1>
+<p>Practical, interview-ready responses for senior DevOps, platform engineering, Linux infrastructure, and SRE roles.</p>
+<p><strong>Answer pattern:</strong> Impact → Investigate → Evidence → Mitigate → Verify → Prevent. Adapt examples to systems you have actually operated. Commands below are diagnostic examples: replace placeholders and verify namespace, context, permissions, and production impact before executing changes.</p>
+<h2>1. Deployment succeeds but traffic reaches the old version</h2>
+<p><strong>Say:</strong> “A successful rollout is not proof that users hit the new version. I follow the request path from the public endpoint back to the workload.”</p>
+<p>1. Confirm image <strong>digest</strong>, rollout state, labels and ready replicas.</p>
+<p>2. Verify Service selector and EndpointSlices point at intended pods.</p>
+<p>3. Inspect Ingress/Gateway/LB rules, canary weights, mesh routes and blue/green switches.</p>
+<p>4. Inspect CDN, proxy and application caching.</p>
+<p>5. Verify externally using a version endpoint/header and request tracing.</p>
+<pre><code>kubectl rollout status deployment/myapp -n production
+kubectl get deploy myapp -n production -o yaml
+kubectl get pods -n production -o wide --show-labels
+kubectl get svc myapp -n production -o yaml
+kubectl get endpointslices -n production -l kubernetes.io/service-name=myapp
+kubectl get ingress -n production</code></pre>
+<p><strong>Takeaway:</strong> The user-facing response is the final source of truth, not CI/CD success.</p>
+<h2>2. Pods are healthy but users get 504 Gateway Timeout</h2>
+<p><strong>Say:</strong> “Pod readiness is one signal. A 504 often occurs at a proxy while waiting for a slow or unreachable upstream.”</p>
+<p>1. Establish affected routes, regions, timeframe and error rate.</p>
+<p>2. Trace edge/CDN → load balancer/Ingress → Service/EndpointSlice → pod → downstream dependencies.</p>
+<p>3. Correlate ingress logs, application logs, distributed traces and p95/p99 latency.</p>
+<p>4. Check connection pools, slow queries, throttling, DNS and network policy.</p>
+<p>5. Mitigate the bottleneck and confirm user-visible error rate recovers.</p>
+<pre><code>kubectl get pods,svc,endpointslices -n production
+kubectl describe ingress myapp -n production
+kubectl logs deployment/myapp -n production --since=15m
+kubectl top pods -n production
+kubectl get events -n production --sort-by=.lastTimestamp</code></pre>
+<p><strong>Takeaway:</strong> Increasing a proxy timeout might conceal an unhealthy dependency rather than solve it.</p>
+<h2>3. AWS spending triples overnight, no deployment</h2>
+<p><strong>Say:</strong> “I treat this as both a cost anomaly and a possible security event.”</p>
+<p>1. Break down cost by account, service, region and usage type in Cost Explorer/CUR (billing data can lag).</p>
+<p>2. Look for autoscaling, NAT/data transfer, log ingestion, storage requests, managed databases and retries.</p>
+<p>3. Review CloudTrail, IAM activity, resource changes and security alerts.</p>
+<p>4. Safely contain unauthorized or nonessential usage without destroying critical workloads.</p>
+<p>5. Set budgets, anomaly detection, tagging/ownership and preventive guardrails.</p>
+<pre><code>aws ec2 describe-instances --query 'Reservations[].Instances[].[InstanceId,State.Name]'
+aws cloudtrail lookup-events --max-results 20</code></pre>
+<p><strong>Takeaway:</strong> “No deployment” does not mean “no change in consumption or access.”</p>
+<h2>4. CI/CD takes 40+ minutes; target under 10 without more hardware</h2>
+<p><strong>Say:</strong> “First measure stage durations and the critical path. Optimize repeated work rather than delete quality controls.”</p>
+<ul>
+<li>Cache dependencies and Docker layers; use deterministic cache keys.</li>
+<li>Parallelize independent tests; remove redundant jobs.</li>
+<li>Use incremental builds and targeted tests with a risk-based full-test policy.</li>
+<li>Build once, then promote the same signed/immutable artifact.</li>
+<li>Reduce checkout, artifact transfer, runner queue time and serial waits.</li>
+<li>Compare median and p95 runtime before and after, plus defect escape rate.</li>
+</ul>
+<pre><code>docker buildx build \
+  --cache-from type=registry,ref=registry.example.com/app:cache \
+  --cache-to type=registry,ref=registry.example.com/app:cache,mode=max \
+  -t registry.example.com/app:build-123 .</code></pre>
+<p><strong>Takeaway:</strong> Ten minutes is a measured target, not permission to skip security or essential tests.</p>
+<h2>5. Infrastructure green; developers say the product is slow</h2>
+<p><strong>Say:</strong> “I believe neither color nor opinion alone. I reproduce the user journey and gather end-to-end evidence.”</p>
+<ul>
+<li>Measure p50/p95/p99 latency, errors, throughput and saturation.</li>
+<li>Compare regions, endpoints, tenant segments and recent changes.</li>
+<li>Check CPU <strong>throttling</strong> (not just usage), thread pools, GC, database locks, queue depth and downstream calls.</li>
+<li>Use distributed traces and synthetic user checks to find the latency hop.</li>
+<li>Fix and validate against user-facing service-level indicators (SLIs).</li>
+</ul>
+<pre><code>vmstat 1 5
+iostat -xz 1 5
+ss -s
+curl -s -o /dev/null -w 'total=%{time_total}\n' https://example.com/</code></pre>
+<p><strong>Takeaway:</strong> Green host dashboards can coexist with a broken user experience.</p>
+<h2>6. Terraform drift threatens critical live infrastructure</h2>
+<p><strong>Say:</strong> “I do not blindly force desired state over production.”</p>
+<p>1. Confirm state backend, workspace, locking and access.</p>
+<p>2. Inspect the proposed plan and differentiate legitimate out-of-band changes from accidental drift.</p>
+<p>3. Decide to codify the actual state, carefully revert the manual change, or import/move state as appropriate.</p>
+<p>4. Assess replacement/downtime risk and obtain normal change approvals.</p>
+<p>5. Apply a reviewed, narrowly scoped plan in a controlled window and verify service.</p>
+<pre><code>terraform state list
+terraform plan -refresh-only
+terraform plan -out=tfplan
+terraform show tfplan</code></pre>
+<p><strong>Takeaway:</strong> A plan showing destructive replacement is a warning, not an instruction to proceed.</p>
+<h2>7. Rollback script fails with an SLA deadline approaching</h2>
+<p><strong>Say:</strong> “I declare or escalate the incident, establish a decision owner, and prioritize safe restoration.”</p>
+<p>1. Confirm impact and freeze unrelated production changes.</p>
+<p>2. Identify the failed rollback step and last known-good artifact/configuration.</p>
+<p>3. Choose a supported alternative: Kubernetes rollout undo, blue/green traffic switch or verified DR process.</p>
+<p>4. Validate compatibility, especially for <strong>database/schema</strong> changes.</p>
+<p>5. Track error rate and latency while communicating impact and recovery status.</p>
+<pre><code>kubectl rollout history deployment/myapp -n production
+# Execute only when the prior revision is known-good and compatible:
+kubectl rollout undo deployment/myapp -n production
+kubectl rollout status deployment/myapp -n production</code></pre>
+<p><strong>Takeaway:</strong> SLA pressure does not justify an unsafe, irreversible production command.</p>
+<h2>8. A secret was pushed to GitHub and already cloned</h2>
+<p><strong>Say:</strong> “Assume exposure persists outside Git, even if history is rewritten.”</p>
+<p>1. Revoke/rotate the credential immediately; deploy replacement through a secret manager.</p>
+<p>2. Check access logs and scope of potential compromise.</p>
+<p>3. Escalate to security and follow incident, notification and evidence-retention processes.</p>
+<p>4. Remove secret from current code and history where practical, but <strong>never treat deletion as remediation</strong>.</p>
+<p>5. Add secret scanning, push protection, short-lived credentials and least privilege.</p>
+<pre><code>git log --all --oneline
+# Search only in an authorized local clone; avoid printing real secrets into logs:
+git grep -n 'EXPOSED_PATTERN' $(git rev-list --all)</code></pre>
+<p><strong>Takeaway:</strong> Rotation first, Git cleanup second.</p>
+<h2>9. Upgrade succeeds in staging but production CoreDNS breaks</h2>
+<p><strong>Say:</strong> “I restore name resolution first, then determine which production-specific difference triggered it.”</p>
+<p>1. Pause further upgrade activity and establish the affected scope.</p>
+<p>2. Check CoreDNS pods/logs, ConfigMap, kube-dns Service and EndpointSlices.</p>
+<p>3. Test service DNS from affected pods and compare working versus failing nodes.</p>
+<p>4. Check CoreDNS/add-on compatibility, CNI, network policy, upstream resolvers and node resolv.conf.</p>
+<p>5. Restore a tested, compatible DNS configuration/add-on using the platform’s supported procedure.</p>
+<p>6. Validate internal/external lookups and application health before continuing upgrades.</p>
+<pre><code>kubectl get pods -n kube-system -l k8s-app=kube-dns
+kubectl logs -n kube-system deployment/coredns
+kubectl get configmap coredns -n kube-system -o yaml
+kubectl get svc kube-dns -n kube-system
+kubectl get endpointslices -n kube-system
+kubectl exec -n production &lt;pod-name&gt; -- nslookup kubernetes.default.svc.cluster.local</code></pre>
+<p><strong>Takeaway:</strong> Do not assume a control-plane upgrade can simply be downgraded.</p>
+<h2>10. Describe a failure <strong>you</strong> introduced</h2>
+<p><strong>Say:</strong> “I will give a specific real example, own the decision, explain recovery, and show what permanently changed.”</p>
+<p>Use a <strong>truthful STAR</strong> story:</p>
+<ul>
+<li><strong>Situation:</strong> What production change were you making and why?</li>
+<li><strong>Task:</strong> What were you responsible for?</li>
+<li><strong>Action:</strong> What assumption or mistake caused the failure? When did you recognize it? How did you contain and recover?</li>
+<li><strong>Result:</strong> How was recovery verified, who was informed and what prevention was introduced (peer review, canary, change testing, rollback rehearsal, better alerts)?</li>
+</ul>
+<p><strong>Fill-in answer, not a claimed personal incident:</strong></p>
+<blockquote>“During [real maintenance/change], I changed [component] based on [assumption]. That led to [measured impact]. I took ownership, [immediate containment], and restored service by [verified recovery action]. The post-incident review identified [root cause]. We introduced [specific control], and verified its effectiveness through [evidence].”</blockquote>
+<p><strong>Takeaway:</strong> Accountability, detection, recovery and learning matter more than pretending you never made a mistake.</p>
+<hr>
+<h2>Rapid-fire interview reminders</h2>
+<table><tbody>
+<tr><td>Concept</td><td>Strong senior-level behavior</td></tr>
+<tr><td>Blast radius</td><td>Assess who and what will be affected before changing production</td></tr>
+<tr><td>Debugging</td><td>State hypothesis, collect evidence, test, revise</td></tr>
+<tr><td>Reliability</td><td>Measure user-facing SLIs, not just machine status</td></tr>
+<tr><td>Recovery</td><td>Know last good version, rollback limitations and validation</td></tr>
+<tr><td>Security</td><td>Contain credentials before cleaning up repositories</td></tr>
+<tr><td>Change management</td><td>Preserve state, document risk and review destructive changes</td></tr>
+<tr><td>Incident leadership</td><td>Communicate impact, decisions, ownership and follow-up</td></tr>
+</tbody></table>
+<p><strong>Practice:</strong> Deliver each response in 60–90 seconds: impact → first checks → discriminating evidence → safe mitigation → proof of recovery → prevention.</p>
+<blockquote>Educational material. Sample commands are not a production runbook; inspect your environment and approval process first.</blockquote>
+<nav>Maintained in <a href="https://github.com/hassankx/linux-infrastructure-toolkit">linux-infrastructure-toolkit</a> · <a href="devops-interview-cheat-sheet.md">Markdown version</a></nav>
+</main></body></html>
