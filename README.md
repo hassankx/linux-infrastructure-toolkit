@@ -62,6 +62,7 @@ Written for RHEL-family distributions (RHEL, Rocky, Alma) and Ubuntu/Debian with
 ## DevOps interview preparation
 
 - [Senior DevOps / SRE Interview Cheat Sheet: 10 Production Scenarios](docs/devops-interview-cheat-sheet.md) — incident-focused questions, troubleshooting commands, recovery decisions, and interview-ready talking points.
+- [Black-background HTML edition](docs/devops-interview-cheat-sheet-dark.html) — download the HTML file and open it in a browser for a fixed dark theme (GitHub file previews do not apply its CSS).
 
 ## License
 
