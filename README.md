@@ -81,6 +81,10 @@ Terraform builds the machines; Ansible configures what runs inside them. The hea
 
 Built by Alhassan Consultancy Canada Inc.
 
+## Kubernetes administration guide
+
+- [Kubernetes: Installation, Architecture, Administration & Troubleshooting](docs/kubernetes-administration-guide.md) — a practical learning guide for Linux administrators, DevOps engineers, and SREs.
+
 ## DevOps interview preparation
 
 - [Senior DevOps / SRE Interview Cheat Sheet: 10 Production Scenarios](docs/devops-interview-cheat-sheet.md) — incident-focused questions, troubleshooting commands, recovery decisions, and interview-ready talking points.
