@@ -63,6 +63,24 @@ The exit code makes the script easy to call from cron, Ansible, or a monitoring 
 
 Written for RHEL-family distributions (RHEL, Rocky, Alma) and Ubuntu/Debian with bash 4 or later. Checks that depend on a missing tool are skipped rather than failing.
 
+## Infrastructure as Code: from blueprint to running servers
+
+![Terraform builds the servers in Azure, Ansible configures them over SSH](docs/media/iac-workflow.gif)
+
+| Step | Tool | Command | What happens |
+| --- | --- | --- | --- |
+| 1. Write | Editor | `main.tf` | Describe the servers you need |
+| 2. Plan | Terraform | `terraform plan` | Preview changes. Read-only |
+| 3. Approve | Reviewer | — | A person checks the plan |
+| 4. Apply | Terraform | `terraform apply` | Azure creates the servers |
+| 5. Hand off | Terraform | `terraform output ips > inventory.ini` | Server IPs become the Ansible inventory |
+| 6. Configure | Ansible | `ansible-playbook site.yml` | Packages, Active Directory, hardening over SSH |
+| 7. Verify | Ansible | `ansible-playbook site.yml` | `changed=0`: servers match the blueprint |
+
+Terraform builds the machines; Ansible configures what runs inside them. The health check in this repo fits naturally after step 7 as a final validation. [Full-resolution video](docs/media/iac-workflow.mp4).
+
+Built by Alhassan Consultancy Canada Inc.
+
 ## DevOps interview preparation
 
 - [Senior DevOps / SRE Interview Cheat Sheet: 10 Production Scenarios](docs/devops-interview-cheat-sheet.md) — incident-focused questions, troubleshooting commands, recovery decisions, and interview-ready talking points.
