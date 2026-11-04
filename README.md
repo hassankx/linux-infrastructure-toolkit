@@ -59,6 +59,10 @@ The exit code makes the script easy to call from cron, Ansible, or a monitoring 
 
 Written for RHEL-family distributions (RHEL, Rocky, Alma) and Ubuntu/Debian with bash 4 or later. Checks that depend on a missing tool are skipped rather than failing.
 
+## DevOps interview preparation
+
+- [Senior DevOps / SRE Interview Cheat Sheet: 10 Production Scenarios](docs/devops-interview-cheat-sheet.md) — incident-focused questions, troubleshooting commands, recovery decisions, and interview-ready talking points.
+
 ## License
 
 MIT
