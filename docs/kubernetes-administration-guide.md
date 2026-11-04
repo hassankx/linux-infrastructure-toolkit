@@ -6,6 +6,10 @@
 >
 > **Safety:** All commands are examples. Verify versions, context, namespaces, and permissions before running them; never run disruptive examples against production.
 
+![Kubernetes in 35 seconds: architecture, desired state, self-healing, scaling, Services and troubleshooting](media/kubernetes-admin.gif)
+
+*The guide in motion: cluster architecture, declaring desired state, self-healing, scaling, Services, and the senior troubleshooting framework. [Full-resolution video](media/kubernetes-admin.mp4).*
+
 ## 1. What is Kubernetes?
 
 Kubernetes is an open-source **container orchestration** platform. It schedules containerized workloads across nodes, maintains a declared desired state, supports service discovery and scaling, and orchestrates rolling deployments.

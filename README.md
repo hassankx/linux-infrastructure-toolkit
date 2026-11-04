@@ -83,6 +83,8 @@ Built by Alhassan Consultancy Canada Inc.
 
 ## Kubernetes administration guide
 
+[![Kubernetes in 35 seconds](docs/media/kubernetes-admin.gif)](docs/kubernetes-administration-guide.md)
+
 - [Kubernetes: Installation, Architecture, Administration & Troubleshooting](docs/kubernetes-administration-guide.md) — a practical learning guide for Linux administrators, DevOps engineers, and SREs.
 
 ## DevOps interview preparation
