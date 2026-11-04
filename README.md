@@ -1,3 +1,7 @@
+[🌌 View the black-and-Milky-Way themed page](index.html) · [Open HTML source](https://github.com/hassankx/linux-infrastructure-toolkit/blob/main/index.html)
+
+> GitHub README pages use GitHub's own theme. Download `index.html` and open it in a browser to see the full starfield design.
+
 # linux-infrastructure-toolkit
 
 A read-only health check for Linux hosts. Run it when you inherit a server, before a change window, or as the first step in an incident, and it tells you in under a second what needs attention.
