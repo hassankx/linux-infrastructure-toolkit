@@ -87,6 +87,14 @@ Built by Alhassan Consultancy Canada Inc.
 
 - [Kubernetes: Installation, Architecture, Administration & Troubleshooting](docs/kubernetes-administration-guide.md) — a practical learning guide for Linux administrators, DevOps engineers, and SREs.
 
+## AI processors explained: CPU, GPU, TPU, NPU, LPU, DPU
+
+![CPU, GPU, TPU, NPU, LPU and DPU explained, animated](docs/media/ai-processors.gif)
+
+What each processor does, how work flows through it, and when to choose it. [Full-resolution video](docs/media/ai-processors.mp4) · [Written guide](docs/ai-processors-explained.md)
+
+Built by Alhassan Consultancy Canada Inc.
+
 ## DevOps interview preparation
 
 - [Senior DevOps / SRE Interview Cheat Sheet: 10 Production Scenarios](docs/devops-interview-cheat-sheet.md) — incident-focused questions, troubleshooting commands, recovery decisions, and interview-ready talking points.
