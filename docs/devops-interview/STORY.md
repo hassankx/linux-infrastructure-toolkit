@@ -1,6 +1,6 @@
 # The DevOps Story: One Shop, One Click, Zero Downtime
 
-Meet Maya. She runs an online shop, `shop.example.com`. Every day, thousands of people click "Buy." Maya's job, as the DevOps engineer, is to make sure those clicks always work, and that new features reach customers without breaking anything.
+Meet Zara. She runs an online shop, `shop.example.com`. Every day, thousands of people click "Buy." Zara's job, as the DevOps engineer, is to make sure those clicks always work, and that new features reach customers without breaking anything.
 
 This story walks through her day in order. Each part answers one interview question in plain language. The full answers are in [DevOps_Interview_QA.md](DevOps_Interview_QA.md).
 
@@ -17,7 +17,7 @@ A customer types `shop.example.com` and presses Enter.
 5. **The room sign (Service).** The cart room has one fixed sign, even though several workers are inside. The sign picks one free worker.
 6. **The worker (pod).** The worker answers, and the answer goes back the same way.
 
-**Maya's rule:** when something breaks, check the path in order. Is the phone book right? Is the front desk sending people to healthy workers? Is the sign pointing at the right room?
+**Zara's rule:** when something breaks, check the path in order. Is the phone book right? Is the front desk sending people to healthy workers? Is the sign pointing at the right room?
 
 **Ansible commands for this step**
 
@@ -39,7 +39,7 @@ ansible k8s_masters -m command -a "kubectl get ingress,svc -n shop"
 
 ## Part 2: The packing box (Docker)
 
-Maya packs each app into a container, a sealed box with everything it needs.
+Zara packs each app into a container, a sealed box with everything it needs.
 
 - `docker run` opens the box, gives it its own space and a limited amount of memory, and starts the app.
 - The box has two labels: **ENTRYPOINT** is the main job ("always run the app"), and **CMD** is the default option ("use port 8000 unless told otherwise").
@@ -69,7 +69,7 @@ ansible-playbook -i inventory.ini run_shop_container.yml
 
 ## Part 3: Keeping the workers running (Kubernetes)
 
-Maya uses Kubernetes as a manager for the workers.
+Zara uses Kubernetes as a manager for the workers.
 
 - **Deployment:** "Always keep 3 copies of the shop running."
 - **StatefulSet:** "The database workers each have a name and a locker that stays with them."
@@ -80,7 +80,7 @@ Two checks keep the workers honest:
 - **Readiness:** "Are you ready for customers?" If not, the sign stops sending people to you. You are not restarted.
 - **Liveness:** "Are you still alive?" If not, the manager restarts you.
 
-When a worker keeps crashing (CrashLoopBackOff), Maya reads its last words in the logs before she changes anything.
+When a worker keeps crashing (CrashLoopBackOff), Zara reads its last words in the logs before she changes anything.
 
 **Ansible commands for this step**
 
@@ -116,7 +116,7 @@ Every change follows the same road:
 
 ![From a commit to production, with a rollback if things go wrong](media/cicd_rollback.gif)
 
-If errors jump, Maya presses one button: **roll back**. The shop returns to yesterday's version in minutes.
+If errors jump, Zara presses one button: **roll back**. The shop returns to yesterday's version in minutes.
 
 **Ansible commands for this step**
 
@@ -137,7 +137,7 @@ ansible-playbook -i inventory.ini deploy.yml --limit production -e image_tag=pre
 
 ## Part 5: The safe, locked storage room (Terraform)
 
-Maya describes all the shop's infrastructure in code. Before any change, she runs a plan that shows exactly what will change.
+Zara describes all the shop's infrastructure in code. Before any change, she runs a plan that shows exactly what will change.
 
 - **Lock:** only one person can change the infrastructure at a time.
 - **Stable names:** each item has its own name, so removing one does not rename the rest.
@@ -171,7 +171,7 @@ ansible-playbook -i inventory.ini drift_check.yml --check --diff
 
 ## Part 6: Watching the shop (monitoring)
 
-Maya watches three things:
+Zara watches three things:
 - **Logs:** the story of each event.
 - **Metrics:** the numbers over time, like how many orders per minute.
 - **Traces:** the path of one customer's order, showing exactly which step was slow.
@@ -212,4 +212,4 @@ ansible-galaxy collection install community.docker kubernetes.core community.gen
 
 ---
 
-**The moral of Maya's story:** a good DevOps system is one where every step is visible, every change can be undone, and customers never notice that anything changed.
+**The moral of Zara's story:** a good DevOps system is one where every step is visible, every change can be undone, and customers never notice that anything changed.
