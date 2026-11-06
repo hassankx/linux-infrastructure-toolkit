@@ -434,6 +434,10 @@ Test failover on a schedule, and keep runbooks and infrastructure as code so the
 
 ## Quick reference: follow-up questions interviewers often ask
 
+![Frequently used Kubernetes and Terraform commands, animated](media/kubernetes_terraform_commands.gif)
+
+The commands below are the ones you are most likely to type in an interview or on the job.
+
 - **Why would you choose a StatefulSet over a Deployment with a PVC?** Stable identity and ordered operations matter for clustered databases.
 - **How do you handle a secret rotation with zero downtime?** Support two valid credentials during the switch, then revoke the old one.
 - **What is the difference between a canary and blue/green deployment?** Canary shifts a small share of traffic to the new version gradually. Blue/green switches all traffic at once between two full environments.
