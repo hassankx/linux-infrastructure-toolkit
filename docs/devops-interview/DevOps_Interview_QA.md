@@ -223,6 +223,10 @@ Across environments:
 
 ## 4. Terraform and Cloud
 
+![Terraform builds the house, Ansible sets up the home: how the two tools differ and work together](media/terraform_vs_ansible.gif)
+
+Terraform provisions the infrastructure (the house), and Ansible configures the systems and deploys applications inside it (the home). The two overlap, since Ansible can provision too, but they are often used together.
+
 ### Q19. How does Terraform state locking work?
 
 **Answer.** Terraform state records what it has created. When two people run `apply` at once, both could change the same resources. A lock prevents that. With an S3 backend, the lock uses a DynamoDB table (or S3 native locking in newer versions): the first `apply` writes a lock item, and a second run waits or fails until the lock is released. A crashed run can leave a stale lock, which you clear with `terraform force-unlock <ID>` only after confirming nothing is running.
