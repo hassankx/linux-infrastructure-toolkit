@@ -61,6 +61,10 @@ Each section restates the question clearly, then gives a detailed answer with a 
 
 ## 2. Docker and Kubernetes
 
+![Docker vs Kubernetes vs SLURM, with the ALLOCATE and DRAIN scripts, animated](media/docker_kubernetes_slurm.gif)
+
+Docker packages an application, Kubernetes keeps services running, and SLURM schedules batch jobs on compute nodes. The ALLOCATE script requests nodes with `sbatch`, `srun` or `salloc`. The DRAIN script empties a node before maintenance and returns it to service.
+
 ### Q6. What happens internally when you run `docker run`?
 
 **Answer.** Roughly:
